@@ -1,0 +1,30 @@
+{
+  "name": "modulo-4-evaluacion-final-bpw-idontwanttobeanurseanymore",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Adalab/modulo-4-evaluacion-final-bpw-idontwanttobeanurseanymore#readme",
+  "bugs": {
+    "url": "https://github.com/Adalab/modulo-4-evaluacion-final-bpw-idontwanttobeanurseanymore/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Adalab/modulo-4-evaluacion-final-bpw-idontwanttobeanurseanymore.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+"scripts": {
+   "start": "node src/index.js",
+   "dev": "node --watch src/index.js",
+   "test": "echo \"Error: no test specified\" && exit 1"
+ },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.5",
+    "react": "^19.2.7",
+    "vite": "^8.1.0"
+  },
+  "devDependencies": {}
+}
