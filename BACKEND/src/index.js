@@ -1,8 +1,8 @@
+import 'dotenv/config';
 import express from "express";
 import path from "node:path";
 import cors from "cors";
 import mysql from "mysql2/promise"
-import 'dotenv/config';
 
 // Configurar el servidor
 const server = express();
@@ -15,7 +15,7 @@ server.use(express.json({ limit: "25Mb" }));
 //server.set("view engine", "ejs");
 
 // Arrancamos
-const port = process.env.PORT;
+const port = process.env.PORT || 4000;
 server.listen(port, () => {
   console.log(`El servidor se ha iniciado en <http://localhost:${port}/>`);
 });
@@ -37,10 +37,10 @@ const getConexion = async () => {
   return conexion;
 };
 
-//ENDPOINTS (method+path)
+//ENDPOINTS (method+path) doctorwho
 
-//doctorwho
-server.get("/doctorwho", async (req, res) => {
+//GET
+server.get("/api/doctorwho", async (req, res) => {
   const conexion = await getConexion();
   const queryListDoctors= `
   SELECT doctors.nombre
@@ -48,12 +48,34 @@ server.get("/doctorwho", async (req, res) => {
   `
   const [resultado] = await conexion.query(queryListDoctors);
   await conexion.end();
-  res.render("doctores-list", {
-    doctores: resultado
-  })
-    res.json({ message: resultado });
+  res.json(resultado)
 });
 
+//POST
+server.post("/api/doctorwho", async (req, res) => {
+  const conexion = await getConexion();
+  const insertData = `
+  INSERT INTO doctorwho.doctors (id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin)
+  VALUES (?, ?, ?, ?, ?)
+  `
+  const [resultadoInsert] = await conexion.execute(insertData, [
+    req.body.id_doctor.
+    req.body.nombre,
+    req.body.actor,
+    req.body.numero,
+    req.body.temporada_inicio,
+    req.body.temporada_fin,
+  ])
+  await conexion.end();
+
+  if(resultadoInsert.affectedRows === 0){
+    res.json({success:false})
+  }else{
+    res.json({success: true, id: resultadoInsert.id})
+  }
+})
+
+/*
 server.get("/doctorwho/:id", (req, res) => {
     res.json({ message: `Personaje con id: ${id}` });
 });
@@ -87,6 +109,9 @@ server.delete('/doctorwho/:id', (req, res) => {
     message: `Personaje ${id} eliminado`
   });
 });
+*/
+
+
 
 //Si la ruta no está bien escrita
 server.get(/.*/, (req, res) => {
