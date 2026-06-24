@@ -43,7 +43,7 @@ const getConexion = async () => {
     try {
       conexion = await getConexion();
       const queryListDoctors = `
-        SELECT doctors.nombre
+        SELECT id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
         FROM doctorwho.doctors
       `;
       const [resultado] = await conexion.query(queryListDoctors);
@@ -110,22 +110,88 @@ server.post("/doctorwho", (req, res) => {
 
 //PUT companion, enemigos, planetas
 
-server.put('/api/doctorwho/:id', (req, res) => {
-  const id = req.params.id;
-  const datos = req.body;
+server.put('/api/doctorwho/:id', async (req, res) => {
+  let conexion;
+  try {
+    conexion = await getConexion();
+    const id = req.params.id;
+    const { nombre, actor, numero, temporada_inicio, temporada_fin } = req.body;
 
-  res.json({
-    message: `Personaje ${id} actualizado`,
-    data: datos
-  });
+    const queryUpdate = `
+      UPDATE doctorwho.doctors
+      SET nombre = ?, actor = ?, numero = ?, temporada_inicio = ?, temporada_fin = ?
+      WHERE id_doctor = ?
+    `;
+
+    const [resultado] = await conexion.execute(queryUpdate, [
+      nombre,
+      actor,
+      numero,
+      temporada_inicio,
+      temporada_fin,
+      id
+    ]);
+
+    if (resultado.affectedRows === 1) {
+      res.json({
+        success: true,
+        message: `Personaje con ID ${id} actualizado correctamente.`,
+        data: { id, nombre, actor, numero, temporada_inicio, temporada_fin }
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: `No se encontró ningún personaje con el ID ${id} para actualizar.`
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  } finally {
+    if (conexion) {
+      await conexion.end();
+    }
+  }
 });
 
-server.delete('/api/doctorwho/:id', (req, res) => {
-  const id = req.params.id;
+//DELETE
 
-  res.json({
-    message: `Personaje ${id} eliminado`
-  });
+server.delete('/api/doctorwho/:id', async (req, res) => {
+  let conexion;
+  try {
+    conexion = await getConexion();
+    const id = req.params.id;
+
+    // 1. Limpiar relaciones en tablas intermedias antes de borrar el doctor
+    const queryDeleteRelationsCompanions = `DELETE FROM doctorwho.doctors_has_companions WHERE doctors_id_doctor = ?`;
+    const queryDeleteRelationsEnemies = `DELETE FROM doctorwho.doctors_has_enemies WHERE doctors_id_doctor = ?`;
+    const queryDeleteRelationsPlanets = `DELETE FROM doctorwho.doctors_has_planets WHERE doctors_id_doctor = ?`;
+    
+    await conexion.execute(queryDeleteRelationsCompanions, [id]);
+    await conexion.execute(queryDeleteRelationsEnemies, [id]);
+    await conexion.execute(queryDeleteRelationsPlanets, [id]);
+
+    // 2. Borrar al doctor del registro
+    const queryDeleteDoctor = `DELETE FROM doctorwho.doctors WHERE id_doctor = ?`;
+    const [resultado] = await conexion.execute(queryDeleteDoctor, [id]);
+
+    if (resultado.affectedRows === 1) {
+      res.json({
+        success: true,
+        message: `Personaje con ID ${id} y sus relaciones asociadas han sido eliminados correctamente.`
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: `No se encontró ningún personaje con el ID ${id} para eliminar.`
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  } finally {
+    if (conexion) {
+      await conexion.end();
+    }
+  }
 });
 
 //Si la ruta no está bien escrita
