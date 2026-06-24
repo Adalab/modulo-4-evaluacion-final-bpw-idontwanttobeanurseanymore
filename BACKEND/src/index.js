@@ -38,6 +38,9 @@ const getConexion = async () => {
 };
 
 //ENDPOINTS (method+path) doctorwho
+server.get("/", (req, res) => {
+  res.send("Ok");
+});
 
 //GET
 server.get("/api/doctorwho", async (req, res) => {
@@ -53,26 +56,39 @@ server.get("/api/doctorwho", async (req, res) => {
 
 //POST
 server.post("/api/doctorwho", async (req, res) => {
+  console.log(req.body);
+
+   try{
   const conexion = await getConexion();
   const insertData = `
   INSERT INTO doctorwho.doctors (id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin)
-  VALUES (?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?)
   `
   const [resultadoInsert] = await conexion.execute(insertData, [
-    req.body.id_doctor.
+    req.body.id_doctor,
     req.body.nombre,
     req.body.actor,
     req.body.numero,
     req.body.temporada_inicio,
     req.body.temporada_fin,
   ])
-  await conexion.end();
 
-  if(resultadoInsert.affectedRows === 0){
-    res.json({success:false})
+  if(resultadoInsert.affectedRows === 1){
+    res.json({
+      success: true,
+    })
   }else{
-    res.json({success: true, id: resultadoInsert.id})
+    res.json({success: false})
+  } 
+}catch(error){
+    res.status(500).json({ success: false, error: error });
+}finally {
+    // 4. Cerramos la conexión.
+    if (conexion) {
+      await conexion.end();
+    }
   }
+
 })
 
 /*
