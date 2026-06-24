@@ -1,2 +1,5 @@
 node_modules
 .env
+EVALUACION_PROYECTO
+*.md
+!readme.md
