@@ -38,28 +38,30 @@ const getConexion = async () => {
 };
 
 //ENDPOINTS (method+path) doctorwho
-server.get("/", (req, res) => {
-  res.send("Ok");
-});
-
-//GET
-server.get("/api/doctorwho", async (req, res) => {
-  const conexion = await getConexion();
-  const queryListDoctors= `
-  SELECT doctors.nombre
-  FROM doctorwho.doctors
-  `
-  const [resultado] = await conexion.query(queryListDoctors);
-  await conexion.end();
-  res.json(resultado)
-});
+  server.get("/api/doctorwho", async (req, res) => {
+    let conexion;
+    try {
+      conexion = await getConexion();
+      const queryListDoctors = `
+        SELECT doctors.nombre
+        FROM doctorwho.doctors
+      `;
+      const [resultado] = await conexion.query(queryListDoctors);
+      res.json(resultado);
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    } finally {
+      if (conexion) {
+        await conexion.end();
+      }
+    }
+  });
 
 //POST
 server.post("/api/doctorwho", async (req, res) => {
-  console.log(req.body);
-
+  let conexion
    try{
-  const conexion = await getConexion();
+  conexion = await getConexion();
   const insertData = `
   INSERT INTO doctorwho.doctors (id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin)
   VALUES (?, ?, ?, ?, ?, ?)
@@ -88,9 +90,7 @@ server.post("/api/doctorwho", async (req, res) => {
       await conexion.end();
     }
   }
-
 })
-
 /*
 server.get("/doctorwho/:id", (req, res) => {
     res.json({ message: `Personaje con id: ${id}` });
@@ -106,9 +106,11 @@ server.post("/doctorwho", (req, res) => {
     data: nuevoPersonaje
   });
 });
+*/
+
 //PUT companion, enemigos, planetas
 
-server.put('/doctorwho/doctors/:id', (req, res) => {
+server.put('/api/doctorwho/:id', (req, res) => {
   const id = req.params.id;
   const datos = req.body;
 
@@ -118,20 +120,16 @@ server.put('/doctorwho/doctors/:id', (req, res) => {
   });
 });
 
-server.delete('/doctorwho/:id', (req, res) => {
+server.delete('/api/doctorwho/:id', (req, res) => {
   const id = req.params.id;
 
   res.json({
     message: `Personaje ${id} eliminado`
   });
 });
-*/
-
-
 
 //Si la ruta no está bien escrita
 server.get(/.*/, (req, res) => {
   //GET http://localhost:4000/*
   res.status(404).send("Página no encontrada.");
 });
-
