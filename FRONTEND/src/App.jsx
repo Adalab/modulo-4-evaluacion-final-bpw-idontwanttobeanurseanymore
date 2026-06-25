@@ -6,10 +6,10 @@ export default function App() {
   return (
     <div>
       <header>
-        <h1>Doctor Who API Project</h1>
+        <h1 className="title">Doctor Who API Project</h1>
       </header>
       <main>
-        <section>
+        <section className="subtitle">
           <h2>Encuentra a tus personajes favoritos de Doctor Who</h2>
           <Form></Form>
         </section>

@@ -11,9 +11,6 @@ const server = express();
 server.use(cors()); // API pública
 server.use(express.json({ limit: "25Mb" }));
 
-// Configuramos Express para que use EJS:
-//server.set("view engine", "ejs");
-
 // Arrancamos
 const port = process.env.PORT || 4000;
 server.listen(port, () => {
@@ -40,6 +37,25 @@ const getConexion = async () => {
 //ENDPOINTS (method+path) doctorwho
 server.get("/", (req, res) => {
   res.send("¡Funciona!");
+});
+
+//SEARCH
+server.get("/api/doctorwho/search", async (req, res) => {
+  const conexion = await getConexion();
+  try {
+    const querySearch = req.query.q;
+    const querySearchDoctors = `
+      SELECT id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
+      FROM doctorwho.doctors
+      WHERE nombre LIKE ?
+    `;
+    const [result] = await conexion.query(querySearchDoctors, [
+      `%${querySearch}%`,
+    ]);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 //GET personajes
@@ -276,9 +292,7 @@ server.delete("/api/doctorwho/:type/:id", async (req, res) => {
 
     let resultado;
 
-    // ======================
-    // DOCTOR (con relaciones)
-    // ======================
+    //DOCTOR
     if (type === "doctor") {
       const queryDeleteRelationsCompanions = `
         DELETE FROM doctorwho.doctors_has_companions 
@@ -307,9 +321,7 @@ server.delete("/api/doctorwho/:type/:id", async (req, res) => {
       [resultado] = await conexion.execute(queryDeleteDoctor, [id]);
     }
 
-    // ======================
-    // COMPANION
-    // ======================
+    //COMPANION
     else if (type === "companion") {
       const queryDeleteCompanion = `
         DELETE FROM doctorwho.companions
@@ -319,9 +331,7 @@ server.delete("/api/doctorwho/:type/:id", async (req, res) => {
       [resultado] = await conexion.execute(queryDeleteCompanion, [id]);
     }
 
-    // ======================
-    // ENEMY
-    // ======================
+    //ENEMY
     else if (type === "enemy") {
       const queryDeleteEnemy = `
         DELETE FROM doctorwho.enemies
@@ -336,9 +346,7 @@ server.delete("/api/doctorwho/:type/:id", async (req, res) => {
       });
     }
 
-    // ======================
-    // RESPUESTA
-    // ======================
+    //RESPONSE
     if (resultado.affectedRows === 1) {
       res.json({
         success: true,

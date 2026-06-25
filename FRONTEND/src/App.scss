@@ -1,0 +1,92 @@
+/* ===== Base ===== */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #062c66;
+  color: #f4f7fb;
+}
+
+/* ===== Header ===== */
+header {
+  background-color: #0b3d91; /* TARDIS blue */
+  padding: 20px;
+  text-align: center;
+}
+
+.title {
+  color: white;
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+}
+
+/* ===== Main ===== */
+.subtitle {
+  text-align: center;
+  padding: 20px;
+}
+
+.subtitle h2 {
+  margin-bottom: 15px;
+}
+
+/* ===== Card ===== */
+.card {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(11, 61, 145, 0.15);
+}
+
+/* ===== Inputs & Controls ===== */
+.search-wrapper input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #a7c7e7;
+  border-radius: 6px;
+  outline: none;
+}
+
+.search-wrapper input:focus {
+  border-color: #0b3d91;
+}
+
+.controls p {
+  margin: 10px 0;
+  color: #062c66;
+}
+
+/* ===== Button ===== */
+.btn-primary {
+  background-color: #0b3d91;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #062c66;
+}
+
+/* ===== Results ===== */
+.results {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-card {
+  background: #f4f7fb;
+  border-left: 4px solid #0b3d91;
+  padding: 10px;
+  border-radius: 6px;
+
+  h3 {
+    color: #062c66;
+  }
+}
