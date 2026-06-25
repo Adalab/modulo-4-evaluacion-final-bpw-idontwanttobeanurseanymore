@@ -1,11 +1,12 @@
 import "./App.scss";
 import Form from "./components/Form";
+//Tardis API Inspector como posible nombre
 
 export default function App() {
   return (
     <div>
       <header>
-        <h1>Tardis API Inspector</h1>
+        <h1>Doctor Who API Project</h1>
       </header>
       <main>
         <section>

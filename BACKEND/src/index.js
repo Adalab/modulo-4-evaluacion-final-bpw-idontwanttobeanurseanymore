@@ -31,13 +31,16 @@ const getConexion = async () => {
     database: process.env.MYSQL_SCHEMA,
   };
 
-  const conexion = await mysql.createConnection(datosConexion); // Crear la cajita de la conexión en el Workbench
-  await conexion.connect(); // Hacer click en la cajita de la conex del Workbench
+  const conexion = await mysql.createConnection(datosConexion);
+  await conexion.connect();
 
   return conexion;
 };
 
 //ENDPOINTS (method+path) doctorwho
+server.get("/", (req, res) => {
+  res.send("¡Funciona!");
+});
 
 //GET doctores
 server.get("/api/doctorwho", async (req, res) => {
@@ -68,13 +71,13 @@ server.get("/api/doctors/:id", async (req, res) => {
 
     conexion = await getConexion();
 
-    const sql = `
+    const sqlDoctor = `
       SELECT id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
       FROM doctorwho.doctors
       WHERE id_doctor = ?
     `;
 
-    const [rows] = await conexion.query(sql, [id]);
+    const [rows] = await conexion.query(sqlDoctor, [id]);
     res.json(rows[0] || null);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -143,13 +146,13 @@ server.put("/api/doctorwho/:id", async (req, res) => {
     if (resultado.affectedRows === 1) {
       res.json({
         success: true,
-        message: `Personaje con ID ${id} actualizado correctamente.`,
+        message: `Doctor con ID ${id} actualizado correctamente.`,
         data: { id, nombre, actor, numero, temporada_inicio, temporada_fin },
       });
     } else {
       res.status(404).json({
         success: false,
-        error: `No se encontró ningún personaje con el ID ${id} para actualizar.`,
+        error: `No se encontró ningún doctor con el ID ${id} para actualizar.`,
       });
     }
   } catch (error) {
@@ -168,7 +171,7 @@ server.delete("/api/doctorwho/:id", async (req, res) => {
     conexion = await getConexion();
     const id = req.params.id;
 
-    // 1. Limpiar relaciones en tablas intermedias antes de borrar el doctor
+    //Borra relaciones en otras tablas para evitar catakroker
     const queryDeleteRelationsCompanions = `DELETE FROM doctorwho.doctors_has_companions WHERE doctors_id_doctor = ?`;
     const queryDeleteRelationsEnemies = `DELETE FROM doctorwho.doctors_has_enemies WHERE doctors_id_doctor = ?`;
     const queryDeleteRelationsPlanets = `DELETE FROM doctorwho.doctors_has_planets WHERE doctors_id_doctor = ?`;
@@ -177,19 +180,19 @@ server.delete("/api/doctorwho/:id", async (req, res) => {
     await conexion.execute(queryDeleteRelationsEnemies, [id]);
     await conexion.execute(queryDeleteRelationsPlanets, [id]);
 
-    // 2. Borrar al doctor del registro
+    //Borrar al doctor
     const queryDeleteDoctor = `DELETE FROM doctorwho.doctors WHERE id_doctor = ?`;
     const [resultado] = await conexion.execute(queryDeleteDoctor, [id]);
 
     if (resultado.affectedRows === 1) {
       res.json({
         success: true,
-        message: `Personaje con ID ${id} y sus relaciones asociadas han sido eliminados correctamente.`,
+        message: `Doctor con ID ${id} ha sido eliminado correctamente.`,
       });
     } else {
       res.status(404).json({
         success: false,
-        error: `No se encontró ningún personaje con el ID ${id} para eliminar.`,
+        error: `No se encontró ningún doctor con el ID ${id} para eliminar.`,
       });
     }
   } catch (error) {
@@ -201,8 +204,7 @@ server.delete("/api/doctorwho/:id", async (req, res) => {
   }
 });
 
-//Si la ruta no está bien escrita
 server.get(/.*/, (req, res) => {
   //GET http://localhost:4000/*
-  res.status(404).send("Página no encontrada.");
+  res.status(404).send("Página no encontrada, prueba a añadir '/api/doctorwho' a tu url");
 });
