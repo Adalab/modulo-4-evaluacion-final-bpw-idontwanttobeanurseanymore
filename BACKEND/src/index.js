@@ -1,8 +1,8 @@
-import 'dotenv/config';
+import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import cors from "cors";
-import mysql from "mysql2/promise"
+import mysql from "mysql2/promise";
 
 // Configurar el servidor
 const server = express();
@@ -26,7 +26,7 @@ const getConexion = async () => {
   const datosConexion = {
     host: process.env.MYSQL_HOST || "localhost",
     port: process.env.MYSQL_PORT || 3306,
-    user: process.env.MYSQL_USER || "root",
+    user: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_SCHEMA,
   };
@@ -38,79 +38,87 @@ const getConexion = async () => {
 };
 
 //ENDPOINTS (method+path) doctorwho
-  server.get("/api/doctorwho", async (req, res) => {
-    let conexion;
-    try {
-      conexion = await getConexion();
-      const queryListDoctors = `
+
+//GET doctores
+server.get("/api/doctorwho", async (req, res) => {
+  let conexion;
+  try {
+    conexion = await getConexion();
+    const queryListDoctors = `
         SELECT id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
         FROM doctorwho.doctors
       `;
-      const [resultado] = await conexion.query(queryListDoctors);
-      res.json(resultado);
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    } finally {
-      if (conexion) {
-        await conexion.end();
-      }
-    }
-  });
-
-//POST
-server.post("/api/doctorwho", async (req, res) => {
-  let conexion
-   try{
-  conexion = await getConexion();
-  const insertData = `
-  INSERT INTO doctorwho.doctors (id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin)
-  VALUES (?, ?, ?, ?, ?, ?)
-  `
-  const [resultadoInsert] = await conexion.execute(insertData, [
-    req.body.id_doctor,
-    req.body.nombre,
-    req.body.actor,
-    req.body.numero,
-    req.body.temporada_inicio,
-    req.body.temporada_fin,
-  ])
-
-  if(resultadoInsert.affectedRows === 1){
-    res.json({
-      success: true,
-    })
-  }else{
-    res.json({success: false})
-  } 
-}catch(error){
-    res.status(500).json({ success: false, error: error });
-}finally {
-    // 4. Cerramos la conexión.
+    const [resultado] = await conexion.query(queryListDoctors);
+    res.json(resultado);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  } finally {
     if (conexion) {
       await conexion.end();
     }
   }
-})
-/*
-server.get("/doctorwho/:id", (req, res) => {
-    res.json({ message: `Personaje con id: ${id}` });
 });
-//Otros GET: 
-  // /doctorwho/search 
-  // /doctorwho/profile
 
-server.post("/doctorwho", (req, res) => {
-  const nuevoPersonaje = req.body;
-  res.json({
-    message: 'Personaje creado',
-    data: nuevoPersonaje
-  });
+//GET doctor
+server.get("/api/doctors/:id", async (req, res) => {
+  let conexion;
+
+  try {
+    const { id } = req.params;
+
+    conexion = await getConexion();
+
+    const sql = `
+      SELECT id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
+      FROM doctorwho.doctors
+      WHERE id_doctor = ?
+    `;
+
+    const [rows] = await conexion.query(sql, [id]);
+    res.json(rows[0] || null);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  } finally {
+    if (conexion) await conexion.end();
+  }
 });
-*/
 
-//PUT companion, enemigos, planetas
+//POST
+server.post("/api/doctorwho", async (req, res) => {
+  let conexion;
+  try {
+    conexion = await getConexion();
+    const insertData = `
+  INSERT INTO doctorwho.doctors (id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin)
+  VALUES (?, ?, ?, ?, ?, ?)
+  `;
+    const [resultadoInsert] = await conexion.execute(insertData, [
+      req.body.id_doctor,
+      req.body.nombre,
+      req.body.actor,
+      req.body.numero,
+      req.body.temporada_inicio,
+      req.body.temporada_fin,
+    ]);
 
-server.put('/api/doctorwho/:id', async (req, res) => {
+    if (resultadoInsert.affectedRows === 1) {
+      res.json({
+        success: true,
+      });
+    } else {
+      res.json({ success: false });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error });
+  } finally {
+    if (conexion) {
+      await conexion.end();
+    }
+  }
+});
+
+//PUT
+server.put("/api/doctorwho/:id", async (req, res) => {
   let conexion;
   try {
     conexion = await getConexion();
@@ -129,19 +137,19 @@ server.put('/api/doctorwho/:id', async (req, res) => {
       numero,
       temporada_inicio,
       temporada_fin,
-      id
+      id,
     ]);
 
     if (resultado.affectedRows === 1) {
       res.json({
         success: true,
         message: `Personaje con ID ${id} actualizado correctamente.`,
-        data: { id, nombre, actor, numero, temporada_inicio, temporada_fin }
+        data: { id, nombre, actor, numero, temporada_inicio, temporada_fin },
       });
     } else {
       res.status(404).json({
         success: false,
-        error: `No se encontró ningún personaje con el ID ${id} para actualizar.`
+        error: `No se encontró ningún personaje con el ID ${id} para actualizar.`,
       });
     }
   } catch (error) {
@@ -154,8 +162,7 @@ server.put('/api/doctorwho/:id', async (req, res) => {
 });
 
 //DELETE
-
-server.delete('/api/doctorwho/:id', async (req, res) => {
+server.delete("/api/doctorwho/:id", async (req, res) => {
   let conexion;
   try {
     conexion = await getConexion();
@@ -165,7 +172,7 @@ server.delete('/api/doctorwho/:id', async (req, res) => {
     const queryDeleteRelationsCompanions = `DELETE FROM doctorwho.doctors_has_companions WHERE doctors_id_doctor = ?`;
     const queryDeleteRelationsEnemies = `DELETE FROM doctorwho.doctors_has_enemies WHERE doctors_id_doctor = ?`;
     const queryDeleteRelationsPlanets = `DELETE FROM doctorwho.doctors_has_planets WHERE doctors_id_doctor = ?`;
-    
+
     await conexion.execute(queryDeleteRelationsCompanions, [id]);
     await conexion.execute(queryDeleteRelationsEnemies, [id]);
     await conexion.execute(queryDeleteRelationsPlanets, [id]);
@@ -177,12 +184,12 @@ server.delete('/api/doctorwho/:id', async (req, res) => {
     if (resultado.affectedRows === 1) {
       res.json({
         success: true,
-        message: `Personaje con ID ${id} y sus relaciones asociadas han sido eliminados correctamente.`
+        message: `Personaje con ID ${id} y sus relaciones asociadas han sido eliminados correctamente.`,
       });
     } else {
       res.status(404).json({
         success: false,
-        error: `No se encontró ningún personaje con el ID ${id} para eliminar.`
+        error: `No se encontró ningún personaje con el ID ${id} para eliminar.`,
       });
     }
   } catch (error) {
