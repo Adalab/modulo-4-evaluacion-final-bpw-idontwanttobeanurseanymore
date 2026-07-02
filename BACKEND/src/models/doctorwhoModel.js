@@ -80,8 +80,8 @@ export const create = async (type, body) => {
   if (type === "doctor") {
     query = `
       INSERT INTO doctors 
-      (numero_doctor, nombre, actor, temporada_inicio, temporada_fin, numero, era)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      (numero_doctor, nombre, actor, temporada_inicio, temporada_fin, era)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
     values = [
       body.numero_doctor,
@@ -89,7 +89,6 @@ export const create = async (type, body) => {
       body.actor,
       body.temporada_inicio,
       body.temporada_fin,
-      body.numero,
       body.era,
     ];
   } else if (type === "companion") {
