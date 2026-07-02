@@ -3,6 +3,7 @@ import express from "express";
 import path from "node:path";
 import cors from "cors";
 import mysql from "mysql2/promise";
+//Intenta dividir el código del servidor en varios ficheros siguiendo, por ejemplo, una arquitectura MVC.
 
 // Configurar el servidor
 const server = express();
@@ -33,6 +34,9 @@ const getConexion = async () => {
 
   return conexion;
 };
+//un poco flojo: Si no están bien los datos de conexión, el servidor falla y da katacroker y se queda parado.
+//No es buena idea poner el nombre del schema/base de datos en las instrucciones SQL porque entondes no nos vale para nada el valor de la configuración de la conexión.
+//Quizá es un buen punto verificar la conexión con la base de datos cuando el servidor arranca y mostrar un error en la consola y pararlo si no se puede conectar.
 
 //ENDPOINTS (method+path) doctorwho
 server.get("/", (req, res) => {
@@ -143,6 +147,7 @@ server.get("/api/doctorwho/:type/:id", async (req, res) => {
 });
 
 //POST
+//No ponas el id en los INSERT y deja que la base de datos asigne uno con el AUTO_INCREMENT. Y, como respuesta del servidor al POST, devuelve un objeto con el ID que se ha insertado (como lo tienes está bien, pero fuerzas al FrontEnd que lleve la cuenta de los ID y se puede confundir).
 server.post("/api/doctorwho/:type", async (req, res) => {
   let conexion;
 
@@ -208,6 +213,7 @@ server.post("/api/doctorwho/:type", async (req, res) => {
 });
 
 //PUT
+//Añade la cláusula `LIMIT 1` en las sentencias UPDATE y DELETE para evitar catástrofes.
 server.put("/api/doctorwho/:type/:id", async (req, res) => {
   let conexion;
 
