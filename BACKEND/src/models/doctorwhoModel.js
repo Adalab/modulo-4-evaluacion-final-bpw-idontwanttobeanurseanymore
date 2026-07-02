@@ -15,7 +15,7 @@ export const searchDoctors = async (search) => {
   await conexion.end();
   return result;
 };
-
+//GET - getAllData
 export const getAllData = async () => {
   const conexion = await getConexion();
 
@@ -69,6 +69,8 @@ export const getByTypeAndId = async (type, id) => {
   await conexion.end();
   return result;
 };
+
+//POST - create
 export const create = async (type, body) => {
   const conexion = await getConexion();
 
@@ -109,11 +111,11 @@ export const create = async (type, body) => {
       VALUES (?, ?, ?)
     `;
     values = [body.nombre, body.alive, body.fecha_muerte];
-  } else if (type === "doctor_companion") {
+  } else if (type === "doctor-companion") {
     query = `
       INSERT INTO doctor_has_companions
       (id_doctor, id_companion, temporada_inicio, temporada_fin, rol, estado_final,
-       primera_aparicion, ultima_aparicion, numero_episodios, relacion_con_doctor)
+      primera_aparicion, ultima_aparicion, numero_episodios, relacion_con_doctor)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     values = [
@@ -128,11 +130,11 @@ export const create = async (type, body) => {
       body.numero_episodios,
       body.relacion_con_doctor,
     ];
-  } else if (type === "doctor_enemy") {
+  } else if (type === "doctor-enemy") {
     query = `
       INSERT INTO doctor_has_enemies
       (id_doctor, id_enemigo, numero_enfrentamientos, primera_vez, ultima_vez,
-       resultado_final, enemigo_derrotado, nivel_peligro, tipo_conflicto)
+      resultado_final, enemigo_derrotado, nivel_peligro, tipo_conflicto)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     values = [
@@ -146,11 +148,11 @@ export const create = async (type, body) => {
       body.nivel_peligro,
       body.tipo_conflicto,
     ];
-  } else if (type === "doctor_planet") {
+  } else if (type === "doctor-planet") {
     query = `
       INSERT INTO doctor_has_planets
       (id_doctor, id_planeta, numero_visitas, primera_visita, ultima_visita,
-       evento_clave, planeta_estado_post, importancia)
+      evento_clave, planeta_estado_post, importancia)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     values = [
@@ -178,6 +180,7 @@ export const create = async (type, body) => {
   return result.affectedRows === 1;
 };
 
+//PUT - update
 export const update = async (type, id, body) => {
   const conexion = await getConexion();
 
@@ -185,33 +188,105 @@ export const update = async (type, id, body) => {
   let values;
 
   if (type === "doctor") {
-    query = `       UPDATE doctors
-      SET nombre=?, actor=?, numero=?, temporada_inicio=?, temporada_fin=?
+    query = `
+      UPDATE doctors
+      SET numero_doctor=?, nombre=?, actor=?, temporada_inicio=?, temporada_fin=?, numero=?, era=?
       WHERE id_doctor=? LIMIT 1
+    `;
+    values = [
+      body.numero_doctor,
+      body.nombre,
+      body.actor,
+      body.temporada_inicio,
+      body.temporada_fin,
+      body.numero,
+      body.era,
+      id,
+    ];
+  } else if (type === "companion") {
+    query = `
+      UPDATE companions
+      SET nombre=?, actor=?, temporada_inicio=?, temporada_fin=?
+      WHERE id_companion=? LIMIT 1
     `;
     values = [
       body.nombre,
       body.actor,
-      body.numero,
       body.temporada_inicio,
       body.temporada_fin,
       id,
     ];
-  } else if (type === "companion") {
-    query = `       
-    UPDATE companions
-      SET nombre=?, actor=?
-      WHERE id_companion=? LIMIT 1
-    `;
-    values = [body.nombre, body.actor, id];
   } else if (type === "enemy") {
-    query = `       
-    UPDATE enemies
-      SET nombre=?
+    query = `
+      UPDATE enemies
+      SET nombre=?, alive=?, fecha_muerte=?
       WHERE id_enemigo=? LIMIT 1
     `;
-    values = [body.nombre, id];
+    values = [body.nombre, body.alive, body.fecha_muerte, id];
+  } else if (type === "doctor-companion") {
+    query = `
+      UPDATE doctor_has_companions
+      SET temporada_inicio=?, temporada_fin=?, rol=?, estado_final=?,
+          primera_aparicion=?, ultima_aparicion=?, numero_episodios=?, relacion_con_doctor=?
+      WHERE id_doctor=? AND id_companion=? LIMIT 1
+    `;
+    values = [
+      body.temporada_inicio,
+      body.temporada_fin,
+      body.rol,
+      body.estado_final,
+      body.primera_aparicion,
+      body.ultima_aparicion,
+      body.numero_episodios,
+      body.relacion_con_doctor,
+      body.id_doctor,
+      body.id_companion,
+    ];
+  } else if (type === "doctor-enemy") {
+    query = `
+      UPDATE doctor_has_enemies
+      SET numero_enfrentamientos=?, primera_vez=?, ultima_vez=?, resultado_final=?,
+          enemigo_derrotado=?, nivel_peligro=?, tipo_conflicto=?
+      WHERE id_doctor=? AND id_enemigo=? LIMIT 1
+    `;
+    values = [
+      body.numero_enfrentamientos,
+      body.primera_vez,
+      body.ultima_vez,
+      body.resultado_final,
+      body.enemigo_derrotado,
+      body.nivel_peligro,
+      body.tipo_conflicto,
+      body.id_doctor,
+      body.id_enemigo,
+    ];
+  } else if (type === "doctor-planet") {
+    query = `
+      UPDATE doctor_has_planets
+      SET numero_visitas=?, primera_visita=?, ultima_visita=?, evento_clave=?,
+          planeta_estado_post=?, importancia=?
+      WHERE id_doctor=? AND id_planeta=? LIMIT 1
+    `;
+    values = [
+      body.numero_visitas,
+      body.primera_visita,
+      body.ultima_visita,
+      body.evento_clave,
+      body.planeta_estado_post,
+      body.importancia,
+      body.id_doctor,
+      body.id_planeta,
+    ];
+  } else if (type === "planet") {
+    query = `
+      UPDATE planets
+      SET nombre=?, destroyed=?
+      WHERE id_planeta=? LIMIT 1
+    `;
+    values = [body.nombre, body.destroyed, id];
   }
+
+  if (!query) throw new Error("Tipo no válido");
 
   const [result] = await conexion.execute(query, values);
   await conexion.end();
@@ -219,41 +294,35 @@ export const update = async (type, id, body) => {
   return result.affectedRows === 1;
 };
 
+//DELETE - remove
 export const remove = async (type, id) => {
   const conexion = await getConexion();
 
-  let result;
+  let query;
+  let values;
 
   if (type === "doctor") {
-    await conexion.execute(
-      `DELETE FROM doctors_has_companions WHERE doctors_id_doctor=?`,
-      [id],
-    );
-    await conexion.execute(
-      `DELETE FROM doctors_has_enemies WHERE doctors_id_doctor=?`,
-      [id],
-    );
-    await conexion.execute(
-      `DELETE FROM doctors_has_planets WHERE doctors_id_doctor=?`,
-      [id],
-    );
-
-    [result] = await conexion.execute(
-      `DELETE FROM doctors WHERE id_doctor=? LIMIT 1`,
-      [id],
-    );
+    query = `
+      DELETE FROM doctors
+      WHERE id_doctor=? LIMIT 1
+    `;
+    values = [id];
   } else if (type === "companion") {
-    [result] = await conexion.execute(
-      `DELETE FROM companions WHERE id_companion=? LIMIT 1`,
-      [id],
-    );
+    query = `
+      DELETE FROM companions
+      WHERE id_companion=? LIMIT 1
+    `;
+    values = [id];
   } else if (type === "enemy") {
-    [result] = await conexion.execute(
-      `DELETE FROM enemies WHERE id_enemigo=? LIMIT 1`,
-      [id],
-    );
+    query = `
+      DELETE FROM enemies
+      WHERE id_enemigo=? LIMIT 1
+    `;
+    values = [id];
   }
 
+  const [result] = await conexion.execute(query, values);
   await conexion.end();
+
   return result.affectedRows === 1;
 };

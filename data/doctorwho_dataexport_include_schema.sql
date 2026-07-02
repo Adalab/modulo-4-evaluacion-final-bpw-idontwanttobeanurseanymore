@@ -31,7 +31,7 @@ CREATE TABLE `companions` (
   `temporada_inicio` int DEFAULT NULL,
   `temporada_fin` int DEFAULT NULL,
   PRIMARY KEY (`id_companion`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `companions` (
 
 LOCK TABLES `companions` WRITE;
 /*!40000 ALTER TABLE `companions` DISABLE KEYS */;
-INSERT INTO `companions` VALUES (1,'Susan Foreman','Carole Ann Ford',1,2),(2,'Ian Chesterton','William Russell',1,2),(3,'Barbara Wright','Jacqueline Hill',1,2),(4,'Jamie McCrimmon','Frazer Hines',4,6),(5,'Jo Grant','Katy Manning',8,10),(6,'Sarah Jane Smith','Elisabeth Sladen',11,14),(7,'Leela','Louise Jameson',14,15),(8,'Romana','Lalla Ward',16,18),(9,'Tegan Jovanka','Janet Fielding',19,21),(10,'Ace','Sophie Aldred',24,26),(11,'Grace Holloway','Daphne Ashbrook',26,26),(12,'Rose Tyler','Billie Piper',1,4),(13,'Martha Jones','Freema Agyeman',3,3),(14,'Donna Noble','Catherine Tate',4,4),(15,'Amy Pond','Karen Gillan',5,7),(16,'Rory Williams','Arthur Darvill',5,7),(17,'Clara Oswald','Jenna Coleman',7,9),(18,'Bill Potts','Pearl Mackie',10,10),(19,'Yasmin Khan','Mandip Gill',11,13),(20,'Ryan Sinclair','Tosin Cole',11,13),(21,'Graham OBrien','Bradley Walsh',11,13),(22,'Ruby Sunday','Millie Gibson',14,15);
+INSERT INTO `companions` VALUES (1,'Susan Foreman','Carole Ann Ford',1,2),(2,'Ian Chesterton','William Russell',1,2),(3,'Barbara Wright','Jacqueline Hill',1,2),(4,'Jamie McCrimmon','Frazer Hines',4,6),(5,'Jo Grant','Katy Manning',8,10),(6,'Sarah Jane Smith','Elisabeth Sladen',11,14),(7,'Leela','Louise Jameson',14,15),(8,'Romana','Lalla Ward',16,18),(9,'Tegan Jovanka','Janet Fielding',19,21),(10,'Ace','Sophie Aldred',24,26),(11,'Grace Holloway','Daphne Ashbrook',26,26),(12,'Rose Tyler','Billie Piper',1,4),(13,'Martha Jones','Freema Agyeman',3,3),(14,'Donna Noble','Catherine Tate',4,4),(15,'Amy Pond','Karen Gillan',5,7),(16,'Rory Williams','Arthur Darvill',5,7),(17,'Clara Oswald','Jenna Coleman',7,9),(18,'Bill Potts','Pearl Mackie',10,10),(19,'Yasmin Khan','Mandip Gill',11,13),(20,'Ryan Sinclair','Tosin Cole',11,13),(21,'Graham OBrien','Bradley Walsh',11,13),(22,'Ruby Sunday','Millie Gibson',14,15),(23,'Doctor la mejor','Marta',1997,2026),(24,'Doctor la mejor','Marta',1997,2026),(25,'Doctor la mejor','Marta',1997,2026),(26,'Doctor la mejor','Marta',1997,2026),(27,'Who?','Marta',1997,2026),(28,'Who?','Marta',1997,2026),(29,'Who?','Marta',1997,2026),(30,'Who?','Marta',1997,2026),(31,'Who?','Marta',1997,2026),(32,'Who?','Marta',1997,2026),(33,'Who?','Marta',1997,2026);
 /*!40000 ALTER TABLE `companions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -63,9 +63,9 @@ CREATE TABLE `doctor_has_companions` (
   `numero_episodios` int DEFAULT NULL,
   `relacion_con_doctor` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id_doctor`,`id_companion`),
-  KEY `id_companion` (`id_companion`),
-  CONSTRAINT `doctor_has_companions_ibfk_1` FOREIGN KEY (`id_doctor`) REFERENCES `doctors` (`id_doctor`),
-  CONSTRAINT `doctor_has_companions_ibfk_2` FOREIGN KEY (`id_companion`) REFERENCES `companions` (`id_companion`)
+  KEY `doctor_has_companions_ibfk_2` (`id_companion`),
+  CONSTRAINT `doctor_has_companions_ibfk_1` FOREIGN KEY (`id_doctor`) REFERENCES `doctors` (`id_doctor`) ON DELETE CASCADE,
+  CONSTRAINT `doctor_has_companions_ibfk_2` FOREIGN KEY (`id_companion`) REFERENCES `companions` (`id_companion`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -97,9 +97,9 @@ CREATE TABLE `doctor_has_enemies` (
   `nivel_peligro` varchar(50) DEFAULT NULL,
   `tipo_conflicto` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id_doctor`,`id_enemigo`),
-  KEY `id_enemigo` (`id_enemigo`),
-  CONSTRAINT `doctor_has_enemies_ibfk_1` FOREIGN KEY (`id_doctor`) REFERENCES `doctors` (`id_doctor`),
-  CONSTRAINT `doctor_has_enemies_ibfk_2` FOREIGN KEY (`id_enemigo`) REFERENCES `enemies` (`id_enemigo`)
+  KEY `doctor_has_enemies_ibfk_2` (`id_enemigo`),
+  CONSTRAINT `doctor_has_enemies_ibfk_1` FOREIGN KEY (`id_doctor`) REFERENCES `doctors` (`id_doctor`) ON DELETE CASCADE,
+  CONSTRAINT `doctor_has_enemies_ibfk_2` FOREIGN KEY (`id_enemigo`) REFERENCES `enemies` (`id_enemigo`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -130,9 +130,9 @@ CREATE TABLE `doctor_has_planets` (
   `planeta_estado_post` varchar(50) DEFAULT NULL,
   `importancia` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id_doctor`,`id_planeta`),
-  KEY `id_planeta` (`id_planeta`),
-  CONSTRAINT `doctor_has_planets_ibfk_1` FOREIGN KEY (`id_doctor`) REFERENCES `doctors` (`id_doctor`),
-  CONSTRAINT `doctor_has_planets_ibfk_2` FOREIGN KEY (`id_planeta`) REFERENCES `planets` (`id_planeta`)
+  KEY `doctor_has_planets_ibfk_2` (`id_planeta`),
+  CONSTRAINT `doctor_has_planets_ibfk_1` FOREIGN KEY (`id_doctor`) REFERENCES `doctors` (`id_doctor`) ON DELETE CASCADE,
+  CONSTRAINT `doctor_has_planets_ibfk_2` FOREIGN KEY (`id_planeta`) REFERENCES `planets` (`id_planeta`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -164,7 +164,7 @@ CREATE TABLE `doctors` (
   `era` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id_doctor`),
   UNIQUE KEY `numero_doctor` (`numero_doctor`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -173,7 +173,7 @@ CREATE TABLE `doctors` (
 
 LOCK TABLES `doctors` WRITE;
 /*!40000 ALTER TABLE `doctors` DISABLE KEYS */;
-INSERT INTO `doctors` VALUES (1,1,'First Doctor','William Hartnell',1,3,1,'classic'),(2,2,'Second Doctor','Patrick Troughton',4,6,2,'classic'),(3,3,'Third Doctor','Jon Pertwee',7,11,3,'classic'),(4,4,'Fourth Doctor','Tom Baker',12,18,4,'classic'),(5,5,'Fifth Doctor','Peter Davison',19,21,5,'classic'),(6,6,'Sixth Doctor','Colin Baker',22,23,6,'classic'),(7,7,'Seventh Doctor','Sylvester McCoy',24,26,7,'classic'),(8,8,'Eighth Doctor','Paul McGann',26,26,8,'classic'),(9,9,'Ninth Doctor','Christopher Eccleston',1,1,9,'modern'),(10,10,'Tenth Doctor','David Tennant',2,4,10,'modern'),(11,11,'Eleventh Doctor','Matt Smith',5,7,11,'modern'),(12,12,'Twelfth Doctor','Peter Capaldi',8,10,12,'modern'),(13,13,'Thirteenth Doctor','Jodie Whittaker',11,13,13,'modern'),(14,14,'Fourteenth Doctor','David Tennant',14,14,14,'modern'),(15,15,'Fifteenth Doctor','Ncuti Gatwa',14,15,15,'modern');
+INSERT INTO `doctors` VALUES (1,1,'First Doctor','William Hartnell',1,3,1,'classic'),(2,2,'Second Doctor','Patrick Troughton',4,6,2,'classic'),(3,3,'Third Doctor','Jon Pertwee',7,11,3,'classic'),(4,4,'Fourth Doctor','Tom Baker',12,18,4,'classic'),(5,5,'Fifth Doctor','Peter Davison',19,21,5,'classic'),(6,6,'Sixth Doctor','Colin Baker',22,23,6,'classic'),(7,7,'Seventh Doctor','Sylvester McCoy',24,26,7,'classic'),(8,8,'Eighth Doctor','Paul McGann',26,26,8,'classic'),(9,9,'Ninth Doctor','Christopher Eccleston',1,1,9,'modern'),(10,10,'Tenth Doctor','David Tennant',2,4,10,'modern'),(11,11,'Eleventh Doctor','Matt Smith',5,7,11,'modern'),(12,12,'Twelfth Doctor','Peter Capaldi',8,10,12,'modern'),(13,13,'Thirteenth Doctor','Jodie Whittaker',11,13,13,'modern'),(14,14,'Fourteenth Doctor','David Tennant',14,14,14,'modern'),(15,15,'Fifteenth Doctor','Ncuti Gatwa',14,15,15,'modern'),(32,18,'Who?','Marta',1997,2026,18,'modern');
 /*!40000 ALTER TABLE `doctors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -191,7 +191,7 @@ CREATE TABLE `enemies` (
   `fecha_muerte` date DEFAULT NULL,
   PRIMARY KEY (`id_enemigo`),
   CONSTRAINT `chk_estado_enemigo` CHECK ((((`alive` = 1) and (`fecha_muerte` is null)) or ((`alive` = 0) and (`fecha_muerte` is not null))))
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -200,7 +200,7 @@ CREATE TABLE `enemies` (
 
 LOCK TABLES `enemies` WRITE;
 /*!40000 ALTER TABLE `enemies` DISABLE KEYS */;
-INSERT INTO `enemies` VALUES (1,'Daleks',1,NULL),(2,'Cybermen',1,NULL),(3,'The Master',1,NULL),(4,'Sontarans',1,NULL),(5,'Davros',1,NULL),(6,'Weeping Angels',1,NULL),(7,'Weeping Angels',1,NULL),(8,'Ashildr (Me)',1,NULL),(9,'Missy',0,'2017-07-01'),(10,'Tim Shaw',1,NULL),(11,'Swarm',0,'2021-12-05'),(12,'Azure',0,'2021-12-05'),(13,'The Toymaker',0,'2023-12-09');
+INSERT INTO `enemies` VALUES (1,'Daleks',1,NULL),(2,'Cybermen',1,NULL),(3,'The Master',1,NULL),(4,'Sontarans',1,NULL),(5,'Davros',1,NULL),(6,'Weeping Angels',1,NULL),(7,'Weeping Angels',1,NULL),(8,'Ashildr (Me)',1,NULL),(9,'Missy',0,'2017-07-01'),(10,'Tim Shaw',1,NULL),(11,'Swarm',0,'2021-12-05'),(12,'Azure',0,'2021-12-05'),(13,'The Toymaker',0,'2023-12-09'),(14,'Doctor la mejor',0,'2026-07-02'),(15,'Doctor la mejor',1,NULL),(16,'Doctor la mejor',0,'2026-07-02'),(17,'Doctor la mejor',1,NULL),(18,'Doctor la mejor',0,'2026-07-02'),(19,'Doctor la mejor',1,NULL),(20,'Doctor la mejor',0,'2026-07-02'),(21,'Doctor la mejor',1,NULL),(22,'Worst enemy',0,'2026-07-02'),(23,'Best enemy',1,NULL),(24,'Worst enemy',0,'2026-07-02'),(25,'Best enemy',1,NULL),(26,'Worst enemy',0,'2026-07-02'),(27,'Best enemy',1,NULL),(28,'Worst enemy',0,'2026-07-02'),(29,'Best enemy',1,NULL),(30,'Worst enemy',0,'2026-07-02'),(31,'Best enemy',1,NULL),(32,'Worst enemy',0,'2026-07-02'),(33,'Best enemy',1,NULL);
 /*!40000 ALTER TABLE `enemies` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -238,4 +238,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-02 12:46:02
+-- Dump completed on 2026-07-02 16:25:00
