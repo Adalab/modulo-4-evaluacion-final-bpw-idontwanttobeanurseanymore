@@ -68,27 +68,56 @@ server.get("/api/doctorwho", async (req, res) => {
   try {
     conexion = await getConexion();
     const queryDoctors = ` 
-    SELECT id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
-    FROM doctorwho.doctors
+      SELECT 
+        id_doctor, 
+        nombre, 
+        actor, 
+        numero, 
+        temporada_inicio, 
+        temporada_fin
+      FROM doctorwho.doctors
     `;
     const [doctors] = await conexion.query(queryDoctors);
 
     const queryCompanions = `
-    SELECT id_companion, nombre, actor 
-    FROM doctorwho.companions
+      SELECT 
+        id_companion, 
+        nombre, 
+        actor,
+        temporada_inicio,
+        temporada_fin
+      FROM doctorwho.companions
     `;
     const [companions] = await conexion.query(queryCompanions);
 
     const queryEnemies = `
-    SELECT id_enemigo, nombre 
-    FROM doctorwho.enemies
+      SELECT 
+        id_enemigo, 
+        nombre,
+        alive,
+        fecha_muerte
+      FROM doctorwho.enemies
     `;
     const [enemies] = await conexion.query(queryEnemies);
 
+    // PLANETS
+    const queryPlanets = `
+      SELECT 
+        id_planeta,
+        nombre,
+        destroyed
+      FROM doctorwho.planets
+    `;
+    const [planets] = await conexion.query(queryPlanets);
+
     res.json({
-      doctors,
-      companions,
-      enemies,
+      success: true,
+      data: {
+        doctors,
+        companions,
+        enemies,
+        planets,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -106,41 +135,170 @@ server.get("/api/doctorwho/:type/:id", async (req, res) => {
 
   try {
     const { type, id } = req.params;
-
     conexion = await getConexion();
-
-    let sql;
-    let params = [id];
-
+    //DOCTOR (y todas sus relaciones)
     if (type === "doctor") {
-      sql = `
-        SELECT id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
+      // 1. Doctor
+      const [doctorRows] = await conexion.query(
+        `
+        SELECT 
+          id_doctor, nombre, actor, numero, temporada_inicio, temporada_fin
         FROM doctorwho.doctors
         WHERE id_doctor = ?
-      `;
-    } else if (type === "companion") {
-      sql = `
-        SELECT nombre, actor
-        FROM doctorwho.companions
-        WHERE id_companion = ?
-      `;
-    } else if (type === "enemy") {
-      sql = `
-        SELECT id_enemigo, nombre
-        FROM doctorwho.enemies
-        WHERE id_enemigo = ?
-      `;
-    } else {
-      return res.status(400).json({
-        error:
-          "¡Vaya! Parece que esta página no existe. Prueba doctor | companion | enemy",
+        `,
+        [id],
+      );
+
+      if (doctorRows.length === 0) {
+        return res.status(404).json({ error: "Doctor no encontrado" });
+      }
+
+      const doctor = doctorRows[0];
+
+      // 2. Companions
+      const [companions] = await conexion.query(
+        `
+        SELECT 
+          c.id_companion,
+          c.nombre,
+          c.actor,
+          dhc.rol,
+          dhc.estado_final,
+          dhc.relacion_con_doctor,
+          dhc.numero_episodios
+        FROM doctorwho.companions c
+        JOIN doctorwho.doctor_has_companions dhc 
+          ON c.id_companion = dhc.id_companion
+        WHERE dhc.id_doctor = ?
+        `,
+        [id],
+      );
+
+      // 3. Enemies
+      const [enemies] = await conexion.query(
+        `
+        SELECT 
+          e.id_enemigo,
+          e.nombre,
+          dhe.numero_enfrentamientos,
+          dhe.resultado_final,
+          dhe.nivel_peligro,
+          dhe.tipo_conflicto
+        FROM doctorwho.enemies e
+        JOIN doctorwho.doctor_has_enemies dhe 
+          ON e.id_enemigo = dhe.id_enemigo
+        WHERE dhe.id_doctor = ?
+        `,
+        [id],
+      );
+
+      // 4. Planets
+      const [planets] = await conexion.query(
+        `
+        SELECT 
+          p.id_planeta,
+          p.nombre,
+          p.destroyed,
+          dhp.numero_visitas,
+          dhp.primera_visita,
+          dhp.ultima_visita,
+          dhp.evento_clave,
+          dhp.planeta_estado_post,
+          dhp.importancia
+        FROM doctorwho.planets p
+        JOIN doctorwho.doctor_has_planets dhp 
+          ON p.id_planeta = dhp.id_planeta
+        WHERE dhp.id_doctor = ?
+        `,
+        [id],
+      );
+
+      return res.json({
+        success: true,
+        data: {
+          doctor,
+          companions,
+          enemies,
+          planets,
+        },
       });
     }
 
-    const [rows] = await conexion.query(sql, params);
-    res.json(rows[0] || null);
+    //COMPANIONS
+    else if (type === "companion") {
+      const [rows] = await conexion.query(
+        `
+        SELECT 
+          id_companion,
+          nombre,
+          actor,
+          temporada_inicio,
+          temporada_fin
+        FROM doctorwho.companions
+        WHERE id_companion = ?
+        `,
+        [id],
+      );
+
+      return res.json({
+        success: true,
+        data: rows[0] || null,
+      });
+    }
+
+    //ENEMIES
+    else if (type === "enemy") {
+      const [rows] = await conexion.query(
+        `
+        SELECT 
+          id_enemigo,
+          nombre,
+          alive,
+          fecha_muerte
+        FROM doctorwho.enemies
+        WHERE id_enemigo = ?
+        `,
+        [id],
+      );
+
+      return res.json({
+        success: true,
+        data: rows[0] || null,
+      });
+    }
+
+    //PLANETS
+    else if (type === "planet") {
+      const [rows] = await conexion.query(
+        `
+        SELECT 
+          id_planeta,
+          nombre,
+          destroyed
+        FROM doctorwho.planets
+        WHERE id_planeta = ?
+        `,
+        [id],
+      );
+
+      return res.json({
+        success: true,
+        data: rows[0] || null,
+      });
+    }
+
+    // ERROR TYPE
+    else {
+      return res.status(400).json({
+        success: false,
+        error: "Type inválido. Usa: doctor | companion | enemy | planet",
+      });
+    }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   } finally {
     if (conexion) await conexion.end();
   }
