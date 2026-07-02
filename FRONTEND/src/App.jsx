@@ -10,7 +10,7 @@ export default function App() {
       <Header></Header>
       <main>
         <section className="subtitle">
-          <h2>Encuentra a tus personajes favoritos de Doctor Who</h2>
+          <h2>Tardis API Inspector</h2>
           <Form></Form>
         </section>
       </main>
