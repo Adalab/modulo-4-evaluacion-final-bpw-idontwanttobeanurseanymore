@@ -69,7 +69,6 @@ export const getByTypeAndId = async (type, id) => {
   await conexion.end();
   return result;
 };
-
 export const create = async (type, body) => {
   const conexion = await getConexion();
 
@@ -77,26 +76,100 @@ export const create = async (type, body) => {
   let values;
 
   if (type === "doctor") {
-    query = `       INSERT INTO doctors (nombre, actor, numero, temporada_inicio, temporada_fin)
-      VALUES (?, ?, ?, ?, ?)
+    query = `
+      INSERT INTO doctors 
+      (numero_doctor, nombre, actor, temporada_inicio, temporada_fin, numero, era)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    values = [
+      body.numero_doctor,
+      body.nombre,
+      body.actor,
+      body.temporada_inicio,
+      body.temporada_fin,
+      body.numero,
+      body.era,
+    ];
+  } else if (type === "companion") {
+    query = `
+      INSERT INTO companions 
+      (nombre, actor, temporada_inicio, temporada_fin)
+      VALUES (?, ?, ?, ?)
     `;
     values = [
       body.nombre,
       body.actor,
-      body.numero,
       body.temporada_inicio,
       body.temporada_fin,
     ];
-  } else if (type === "companion") {
-    query = `       INSERT INTO companions (nombre, actor)
+  } else if (type === "enemy") {
+    query = `
+      INSERT INTO enemies 
+      (nombre, alive, fecha_muerte)
+      VALUES (?, ?, ?)
+    `;
+    values = [body.nombre, body.alive, body.fecha_muerte];
+  } else if (type === "doctor_companion") {
+    query = `
+      INSERT INTO doctor_has_companions
+      (id_doctor, id_companion, temporada_inicio, temporada_fin, rol, estado_final,
+       primera_aparicion, ultima_aparicion, numero_episodios, relacion_con_doctor)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    values = [
+      body.id_doctor,
+      body.id_companion,
+      body.temporada_inicio,
+      body.temporada_fin,
+      body.rol,
+      body.estado_final,
+      body.primera_aparicion,
+      body.ultima_aparicion,
+      body.numero_episodios,
+      body.relacion_con_doctor,
+    ];
+  } else if (type === "doctor_enemy") {
+    query = `
+      INSERT INTO doctor_has_enemies
+      (id_doctor, id_enemigo, numero_enfrentamientos, primera_vez, ultima_vez,
+       resultado_final, enemigo_derrotado, nivel_peligro, tipo_conflicto)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    values = [
+      body.id_doctor,
+      body.id_enemigo,
+      body.numero_enfrentamientos,
+      body.primera_vez,
+      body.ultima_vez,
+      body.resultado_final,
+      body.enemigo_derrotado,
+      body.nivel_peligro,
+      body.tipo_conflicto,
+    ];
+  } else if (type === "doctor_planet") {
+    query = `
+      INSERT INTO doctor_has_planets
+      (id_doctor, id_planeta, numero_visitas, primera_visita, ultima_visita,
+       evento_clave, planeta_estado_post, importancia)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    values = [
+      body.id_doctor,
+      body.id_planeta,
+      body.numero_visitas,
+      body.primera_visita,
+      body.ultima_visita,
+      body.evento_clave,
+      body.planeta_estado_post,
+      body.importancia,
+    ];
+  } else if (type === "planet") {
+    query = `
+      INSERT INTO planets
+      (nombre, destroyed)
       VALUES (?, ?)
     `;
-    values = [body.nombre, body.actor];
-  } else if (type === "enemy") {
-    query = `       INSERT INTO enemies (nombre)
-      VALUES (?)
-    `;
-    values = [body.nombre];
+    values = [body.nombre, body.destroyed];
   }
 
   const [result] = await conexion.execute(query, values);
@@ -125,13 +198,15 @@ export const update = async (type, id, body) => {
       id,
     ];
   } else if (type === "companion") {
-    query = `       UPDATE companions
+    query = `       
+    UPDATE companions
       SET nombre=?, actor=?
       WHERE id_companion=? LIMIT 1
     `;
     values = [body.nombre, body.actor, id];
   } else if (type === "enemy") {
-    query = `       UPDATE enemies
+    query = `       
+    UPDATE enemies
       SET nombre=?
       WHERE id_enemigo=? LIMIT 1
     `;
