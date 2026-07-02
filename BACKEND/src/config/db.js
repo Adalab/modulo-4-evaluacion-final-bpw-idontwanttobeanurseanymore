@@ -1,5 +1,5 @@
 import mysql from "mysql2/promise";
-
+import "dotenv/config";
 export const getConexion = async () => {
   const datosConexion = {
     host: process.env.MYSQL_HOST || "localhost",

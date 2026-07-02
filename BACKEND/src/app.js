@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import doctorwhoRoutes from "./routes/doctorwhoRoutes.js";
-
+import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 const app = express();
 
 app.use(cors());
