@@ -1,26 +1,27 @@
-/* ===== Base ===== */
+:root {
+  --tardis-blue: #0d1b2a;
+  --tardis-blue-light: #1b263b;
+  --tardis-border: #274c77;
+  --tardis-white: #f1f1f1;
+  --tardis-black: #0a0a0a;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #062c66;
+  background-color: var(--tardis-blue);
   color: #f4f7fb;
 }
 
-/* ===== Header ===== */
-header {
-  background-color: #0b3d91; /* TARDIS blue */
-  padding: 20px;
-  text-align: center;
-}
-
-.title {
-  color: white;
-  margin: 0;
-  font-size: 1.8rem;
-  letter-spacing: 1px;
-}
-
 /* ===== Main ===== */
+main {
+  border: 5px solid var(--tardis-border);
+}
 .subtitle {
   text-align: center;
   padding: 20px;
